@@ -1,0 +1,84 @@
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+int main() {
+    double numbers[12] = {0}; 
+
+    char choice;
+    int attempts = 0;
+
+    
+    cout << "Wybierz opcje:\n";
+    cout << "a. Zakres losowania liczb (0-1)\n";
+    cout << "b. Zakres losowania liczb <1-9>\n";
+    cout << "c. Zakres losowania liczb <10-20)\n";
+
+    while (true) {
+        cout << "Twoj wybor: ";
+        cin >> choice;
+
+      
+        if (choice == 'a' || choice == 'b' || choice == 'c') {
+            break; 
+        } else {
+            attempts++;
+            if (attempts >= 3) {
+                cout << "Nieprawidlowy wybor. Wybieram opcje a.\n";
+                choice = 'a'; 
+                break; 
+            }
+            cout << "Nieprawidlowy wybor. Sprobuj ponownie.\n";
+        }
+    }
+
+   
+    srand(time(NULL));
+
+   
+    double min, max;
+    double *ptr_numbers = numbers;
+    double suma = 0;
+    double losowanie;
+
+    switch (choice) {
+        case 'a':
+            min = 0;
+            max = 1;
+            break;
+        case 'b':
+            min = 1;
+            max = 9;
+            break;
+        case 'c':
+            min = 10;
+            max = 20;
+            break;
+    }
+
+
+    for (int i = 0; i < 12; ++i) {
+    
+        losowanie = min + static_cast<double>(rand()) / RAND_MAX * (max - min);
+        *ptr_numbers += losowanie;
+        suma += *ptr_numbers;
+        ptr_numbers++;
+    }
+
+   
+    ptr_numbers = numbers; 
+    for (int i = 0; i < 12; ++i) {
+        cout << fixed << setprecision(2) << *ptr_numbers << "\t"; 
+        ptr_numbers++;
+    }
+    cout << endl;
+
+  
+    double srednia = suma / 12;
+    cout << "Srednia elementow w tablicy: " << srednia << endl;
+
+    return 0;
+}
