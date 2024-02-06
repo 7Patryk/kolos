@@ -1,0 +1,133 @@
+#include <iostream>
+#include <stdexcept>
+#include <cmath>
+
+using namespace std;
+
+enum class TypPanelu { Jinko, Luxor, REC, Trina, QCells };
+
+struct Falownik {
+    char nazwa[50];
+  
+};
+
+struct Panel {
+    TypPanelu typ;
+    Falownik* falownik; 
+    uint16_t mocMaks;
+    double mocWyjsciowa;
+};
+
+void wypelnijPanel(Panel& panel, TypPanelu typ, Falownik* falownik, uint16_t mocMaks, double mocWyjsciowa) {
+    panel.typ = typ;
+    panel.falownik = falownik;
+    panel.mocMaks = mocMaks;
+    panel.mocWyjsciowa = mocWyjsciowa;
+}
+
+void wypiszPanel(const Panel& panel) {
+    cout << "Typ panelu: ";
+    switch (panel.typ) {
+        case TypPanelu::Jinko:
+            cout << "Jinko";
+            break;
+        case TypPanelu::Luxor:
+            cout << "Luxor";
+            break;
+        case TypPanelu::REC:
+            cout << "REC";
+            break;
+        case TypPanelu::Trina:
+            cout << "Trina";
+            break;
+        case TypPanelu::QCells:
+            cout << "QCells";
+            break;
+        default:
+            cout << "Nieznany";
+    }
+    cout << endl;
+    cout << "Falownik: " << panel.falownik->nazwa << endl; // Wyświetlenie nazwy falownika
+    cout << "Moc maksymalna: " << panel.mocMaks << " W" << endl;
+    cout << "Moc wyjściowa: " << panel.mocWyjsciowa << " W" << endl;
+}
+
+double maksRoznMocy(Panel* panele, int n) {
+    if (n <= 0) {
+        throw invalid_argument("Liczba paneli musi być większa od zera.");
+    }
+
+    double sumaMocy = 0.0;
+    for (int i = 0; i < n; ++i) {
+        sumaMocy += panele[i].mocWyjsciowa;
+    }
+
+    double sredniaMoc = sumaMocy / n;
+    double maxRoznica = 0.0;
+    Panel* panelNajRozn = nullptr;
+    cout<<"srednia moc: "<<sredniaMoc<<endl;
+    
+    for (int i = 0; i < n; ++i) {
+        double roznica = abs(panele[i].mocWyjsciowa - sredniaMoc);
+        if (roznica > maxRoznica) {
+            maxRoznica = roznica;
+            panelNajRozn = &panele[i];
+        }
+    }
+
+    if (panelNajRozn == nullptr) {
+        throw runtime_error("Nie znaleziono panelu o maksymalnej odchyłce mocy.");
+    }
+
+    if (panelNajRozn->falownik == nullptr) {
+        throw runtime_error("Nieprzypisany falownik dla panelu.");
+    }
+
+    return panelNajRozn->mocWyjsciowa;
+}
+
+void testPoprawnoscNajwiekszejOdchyłki() {
+    Falownik falownik1 = {"Nazwa falownika 1"};
+    Falownik falownik2 = {"Nazwa falownika 2"};
+    Falownik falownik3 = {"Nazwa falownika 3"};
+    Falownik falownik4 = {"Nazwa falownika 4"};
+    Falownik falownik5 = {"Nazwa falownika 5"};
+    Panel panele[] = {
+        {TypPanelu::Jinko, &falownik1, 400, 300.0},
+        {TypPanelu::Luxor, &falownik2, 450, 320.1},
+        {TypPanelu::REC, &falownik3, 500, 280.5},
+        {TypPanelu::Trina, &falownik4, 395, 285.7},
+        {TypPanelu::QCells, &falownik5, 455, 312.6}
+    };
+
+    try {
+        double najwiekszaOdchyłka = maksRoznMocy(panele, 5);
+        cout << "Test 1: Dobrze" << endl;
+    } catch (const exception& e) {
+        cerr << "Test 1: Błąd: " << e.what() << endl;
+    }
+}
+
+void testWyjatekNieprzypisanegoFalownika() {
+    Panel panele[] = {
+        {TypPanelu::Jinko, nullptr, 400, 300.0},
+        {TypPanelu::Luxor, nullptr, 450, 320.1},
+        {TypPanelu::REC, nullptr, 500, 280.5},
+        {TypPanelu::Trina, nullptr, 395, 285.7},
+        {TypPanelu::QCells, nullptr, 455, 312.6}
+    };
+
+    try {
+        double najwiekszaOdchyłka = maksRoznMocy(panele, 5);
+        cout << "Test 2: Błąd" << endl;
+    } catch (const exception& e) {
+        cout << "Test 2: Dobrze" << endl;
+    }
+}
+
+int main() {
+    testPoprawnoscNajwiekszejOdchyłki();
+    testWyjatekNieprzypisanegoFalownika();
+
+    return 0;
+}
